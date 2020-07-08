@@ -62,3 +62,35 @@ app.put("/editJob", async (req, res) => {
   conn.release();
   res.status(200).send("edit success");
 });
+
+app.get("/getJobListByDate", async (req, res) => {
+  console.log(req.url);
+  let type = req.query.type;
+  let count = req.query.value.split("-").length - 1;
+  if (count === 0) {
+    req.query.value += "-01-01";
+  } else if (count === 1) {
+    req.query.value += "-01";
+  }
+  let value = req.query.value;
+  let sql;
+  let conn = await pool.getConnection();
+  if (type === "year") {
+    sql = `SELECT * FROM JobList WHERE YEAR(workTime) =  YEAR("${value}");`;
+    let result = await conn.query(sql);
+    conn.release();
+    res.send(result);
+  } else if (type === "month") {
+    sql = `SELECT * FROM JobList WHERE MONTH(workTime) =  MONTH("${value}") AND YEAR(workTime) = YEAR("${value}");`;
+    let result = await conn.query(sql);
+    conn.release();
+    res.send(result);
+  } else if (type === "date") {
+    sql = `SELECT * FROM JobList WHERE DATE(workTime) =  DATE("${value}");`;
+    let result = await conn.query(sql);
+    conn.release();
+    res.send(result);
+  } else {
+    res.status(400).send("Bad request.");
+  }
+});
