@@ -20,10 +20,6 @@ app.get("/getAllJobList", async (req, res) => {
   conn.release();
   res.send(result);
 });
-app.listen("3000", () => {
-  console.log("Server started on port 3000");
-});
-
 app.delete("/deleteJob/:jobId", async (req, res) => {
   let conn = await pool.getConnection();
   console.log(req.params.jobId);
@@ -93,4 +89,28 @@ app.get("/getJobListByDate", async (req, res) => {
   } else {
     res.status(400).send("Bad request.");
   }
+});
+
+app.get("/getSetting", async (req, res) => {
+  let conn = await pool.getConnection();
+  let result = await conn.query("SELECT * FROM Setting;");
+  conn.release();
+  res.send(result[0]);
+});
+
+app.put("/editSetting", async (req, res) => {
+  let conn = await pool.getConnection();
+  console.log(req.body);
+  const sql = `UPDATE Setting 
+  SET 
+      defaultOnTop = "${req.body.defaultOnTop}",
+      defaultSlowModeVelocity = "${req.body.defaultSlowModeVelocity}"
+  WHERE  1`;
+  let result = await conn.query(sql);
+  conn.release();
+  res.status(200).send("edit success");
+});
+
+app.listen("3000", () => {
+  console.log("Server started on port 3000");
 });
